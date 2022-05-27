@@ -18,7 +18,7 @@ SCRIPT_VERSION="20220430";
 FOX_BASE_VERSION="R11.1";
 
 # Our starting point (Fox base dir)
-BASE_DIR="$PWD";
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )";
 
 # default directory for the new manifest
 MANIFEST_DIR="";
