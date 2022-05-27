@@ -23,9 +23,19 @@ BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )";
 # default directory for the new manifest
 MANIFEST_DIR="";
 
+# colours
+NC='\033[0m';
+RED='\033[0;31m';
+BLUE='\033[0;34m';
+GREEN='\033[0;32m';
+ORANGE='\033[0;33m';
+WHITEONRED='\033[0;41m';
+WHITEONGREEN='\033[0;42m';
+WHITEONORANGE='\033[0;43m';
+
 # functions to set up things for each supported manifest branch
 do_fox_121() {
-	echo "ERROR: fox_12.1 is not ready. Quitting.";
+	echo -e $RED"ERROR: fox_12.1 is not ready. Quitting."$NC;
 	exit 1;
 
 	BASE_VER=12;
@@ -48,7 +58,7 @@ do_fox_110() {
 	test_build_device="vayu"; # the device whose tree we can clone for compiling a test build
 	MIN_MANIFEST="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git";
 	[ -z "$MANIFEST_DIR" ] && MANIFEST_DIR="$BASE_DIR/$FOX_DEF_BRANCH";
-	echo "-- NOTE: the \"$FOX_BRANCH\" branch is still BETA as far as Virtual A/B (\"VAB\") devices are concerned. Treat it as such.";
+	echo -e $WHITEONORANGE"-- NOTE: the \"$FOX_BRANCH\" branch is still BETA as far as Virtual A/B (\"VAB\") devices are concerned. Treat it as such."$NC;
 }
 
 do_fox_100() {
@@ -173,7 +183,7 @@ Process_CMD_Line() {
                 		elif [ "$1" = "7.1" ]; then do_fox_71;
                 		elif [ "$1" = "6.0" ]; then do_fox_60;
                 	else
-                  	   	echo "Invalid branch \"$1\". Read the help screen below.";
+                  	   	echo -e $RED"Invalid branch \"$1\". Read the help screen below."$NC;
                   	   	echo "";
                   	   	help_screen;
                 	fi
@@ -185,14 +195,14 @@ Process_CMD_Line() {
 
    # do we have all the necessary branch information?
    if [ -z "$FOX_BRANCH" -o -z "$TWRP_BRANCH" -o -z "$DEVICE_BRANCH" -o -z "$FOX_DEF_BRANCH" ]; then
-   	echo "No branch has been specified. Read the help screen below.";
+   	echo -e $RED"No branch has been specified. Read the help screen below."$NC;
    	echo "";
    	help_screen;
    fi
 
   # do we have a manifest directory?
   if [ -z "$MANIFEST_DIR" ]; then
-   	echo "No path has been specified for the manifest. Read the help screen below.";
+   	echo -e $RED"No path has been specified for the manifest. Read the help screen below."$NC;
    	echo "";
    	help_screen;
   fi
@@ -201,7 +211,7 @@ Process_CMD_Line() {
 
 # print message and quit
 abort() {
-  echo "$@";
+  echo -e $RED"$@"$NC;
   exit 1;
 }
 
@@ -222,10 +232,10 @@ update_environment() {
 
 # init the script, ensure we have the patch file, and create the manifest directory
 init_script() {
-  echo "-- Starting the script ...";
+  echo -e $ORANGE"-- Starting the script ..."$NC;
   [ ! -f "$PATCH_FILE" ] && abort "-- I cannot find the patch file: $PATCH_FILE - quitting!";
 
-  echo "-- The new build system will be located in \"$MANIFEST_DIR\"";
+  echo -e $ORANGE"-- The new build system will be located in \"$MANIFEST_DIR\""$NC;
   mkdir -p $MANIFEST_DIR;
   [ "$?" != "0" -a ! -d $MANIFEST_DIR ] && {
     abort "-- Invalid directory: \"$MANIFEST_DIR\". Quitting.";
@@ -235,27 +245,27 @@ init_script() {
 # repo init and repo sync
 get_twrp_minimal_manifest() {
   cd $MANIFEST_DIR;
-  echo "-- Initialising the $TWRP_BRANCH minimal manifest repo ...";
+  echo -e $ORANGE"-- Initialising the $TWRP_BRANCH minimal manifest repo ..."$NC;
   repo init --depth=1 -u $MIN_MANIFEST -b $TWRP_BRANCH;
   [ "$?" != "0" ] && {
    abort "-- Failed to initialise the minimal manifest repo. Quitting.";
   }
-  echo "-- Done.";
+  echo -e $ORANGE"-- Done."$NC;
 
-  echo "-- Syncing the $TWRP_BRANCH minimal manifest repo ...";
+  echo -e $ORANGE"-- Syncing the $TWRP_BRANCH minimal manifest repo ..."$NC;
   repo sync;
   [ "$?" != "0" ] && {
-   abort "-- Failed to Sync the minimal manifest repo. Quitting.";
+   abort $RED"-- Failed to Sync the minimal manifest repo. Quitting.";
   }
-  echo "-- Done.";
+  echo -e $ORANGE"-- Done."$NC;
 }
 
 # patch the build system for OrangeFox
 patch_minimal_manifest() {
-   echo "-- Patching the $TWRP_BRANCH minimal manifest for building OrangeFox for native $DEVICE_BRANCH devices ...";
+   echo -e $ORANGE"-- Patching the $TWRP_BRANCH minimal manifest for building OrangeFox for native $DEVICE_BRANCH devices ..."$NC;
    cd $MANIFEST_BUILD_DIR;
    patch -p1 < $PATCH_FILE;
-   [ "$?" = "0" ] && echo "-- The $TWRP_BRANCH minimal manifest has been patched successfully" || abort "-- Failed to patch the $TWRP_BRANCH minimal manifest! Quitting.";
+   [ "$?" = "0" ] && echo -e $ORANGE"-- The $TWRP_BRANCH minimal manifest has been patched successfully" || abort "-- Failed to patch the $TWRP_BRANCH minimal manifest! Quitting.";
 
    # save location of manifest dir
    echo "#" &> $SYNC_LOG;
@@ -268,12 +278,12 @@ clone_common() {
    cd $MANIFEST_DIR/;
 
    if [ ! -d "device/qcom/common" ]; then
-   	echo "-- Cloning qcom common ...";
+   	echo -e $ORANGE"-- Cloning qcom common ..."$NC;
 	git clone https://github.com/TeamWin/android_device_qcom_common -b $DEVICE_BRANCH device/qcom/common;
    fi
 
    if [ ! -d "device/qcom/twrp-common" ]; then
-   	echo "-- Cloning twrp-common ...";
+   	echo -e $ORANGE"-- Cloning twrp-common ..."$NC;
    	git clone https://github.com/TeamWin/android_device_qcom_twrp-common -b $DEVICE_BRANCH device/qcom/twrp-common;
    fi
 }
@@ -283,7 +293,7 @@ clone_commonsys(){
 	 cd $MANIFEST_DIR/;
 	 if [ "$CLONE_COMMONSYS_REPO" = "true" ]; then
 		if [ ! -d vendor/qcom/opensource/commonsys ]; then
-			echo "-- Cloning qcom commonsys ...";
+			echo -e $ORANGE"-- Cloning qcom commonsys ..."$NC;
 			git clone --depth=1 https://github.com/TeamWin/android_vendor_qcom_opensource_commonsys.git -b $DEVICE_BRANCH vendor/qcom/opensource/commonsys;
 		fi
 	fi
@@ -301,24 +311,24 @@ local BRANCH=$FOX_BRANCH;
 
    mkdir -p $MANIFEST_DIR/bootable;
    [ ! -d $MANIFEST_DIR/bootable ] && {
-      echo "-- Invalid directory: $MANIFEST_DIR/bootable";
+      echo -e $WHITEONORANGE"-- Invalid directory: $MANIFEST_DIR/bootable"$NC;
       return;
    }
 
    cd $MANIFEST_DIR/bootable/;
    [ -d recovery/ ] && {
-      echo  "-- Moving the TWRP recovery sources to /tmp";
+      echo -e $ORANGE"-- Moving the TWRP recovery sources to /tmp"$NC;
       rm -rf /tmp/recovery;
       mv recovery /tmp;
    }
 
-   echo "-- Pulling the OrangeFox recovery sources ...";
+   echo -e $ORANGE"-- Pulling the OrangeFox recovery sources ..."$NC;
    git clone --recurse-submodules $URL -b $BRANCH recovery;
-   [ "$?" = "0" ] && echo "-- The OrangeFox sources have been cloned successfully" || echo "-- Failed to clone the OrangeFox sources!";
+   [ "$?" = "0" ] && echo -e $WHITEONGREEN"-- The OrangeFox sources have been cloned successfully"$NC || echo -e $WHITEONRED"-- Failed to clone the OrangeFox sources!"$NC;
 
    # check that the themes are correctly downloaded
    if [ ! -f recovery/gui/theme/portrait_hdpi/ui.xml ]; then
-      	echo "-- Themes not found! Trying again to pull the themes ...";
+      	echo -e $ORANGE"-- Themes not found! Trying again to pull the themes ..."$NC;
    	if [ "$USE_SSH" = "0" ]; then
       	   URL="https://gitlab.com/OrangeFox/misc/theme.git";
    	else
@@ -326,11 +336,11 @@ local BRANCH=$FOX_BRANCH;
    	fi
       	[ -d recovery/gui/theme ] && rm -rf recovery/gui/theme;
       	git clone $URL recovery/gui/theme;
-      	[ "$?" = "0" ] && echo "-- The themes have been cloned successfully" || echo "-- Failed to clone the themes!";
+      	[ "$?" = "0" ] && echo -e $ORANGE"-- The themes have been cloned successfully"$NC || echo -e $RED"-- Failed to clone the themes!"$NC;
    fi
 
    # cleanup /tmp/recovery/
-   echo  "-- Cleaning up the TWRP recovery sources from /tmp";
+   echo -e $ORANGE"-- Cleaning up the TWRP recovery sources from /tmp"$NC;
    rm -rf /tmp/recovery;
 
    # create the directory for Xiaomi device trees
@@ -349,18 +359,18 @@ local BRANCH=$FOX_BRANCH;
       URL="git@gitlab.com:OrangeFox/vendor/recovery.git";
    fi
 
-   echo "-- Preparing for cloning the OrangeFox vendor tree ...";
+   echo -e $ORANGE"-- Preparing for cloning the OrangeFox vendor tree ..."$NC;
    rm -rf $MANIFEST_DIR/vendor/recovery;
    mkdir -p $MANIFEST_DIR/vendor;
    [ ! -d $MANIFEST_DIR/vendor ] && {
-      echo "-- Invalid directory: $MANIFEST_DIR/vendor";
+      echo -e $RED"-- Invalid directory: $MANIFEST_DIR/vendor"$NC;
       return;
    }
 
    cd $MANIFEST_DIR/vendor;
-   echo "-- Pulling the OrangeFox vendor tree ...";
+   echo -e $ORANGE"-- Pulling the OrangeFox vendor tree ..."$NC;
    git clone $URL -b $BRANCH recovery;
-   [ "$?" = "0" ] && echo "-- The OrangeFox vendor tree has been cloned successfully" || echo "-- Failed to clone the OrangeFox vendor tree!";
+   [ "$?" = "0" ] && echo -e $WHITEONGREEN"-- The OrangeFox vendor tree has been cloned successfully"$NC || echo -e $RED"-- Failed to clone the OrangeFox vendor tree!"$NC;
 }
 
 # get the OrangeFox busybox sources
@@ -375,11 +385,11 @@ local BRANCH="android-9.0";
       URL="git@gitlab.com:OrangeFox/external/busybox.git";
    fi
 
-   echo "-- Preparing for cloning the OrangeFox busybox sources ...";
+   echo -e $ORANGE"-- Preparing for cloning the OrangeFox busybox sources ..."$NC;
    cd $MANIFEST_DIR/external;
-   echo "-- Pulling the OrangeFox busybox sources ...";
+   echo -e $ORANGE"-- Pulling the OrangeFox busybox sources ..."$NC;
    git clone $URL -b $BRANCH busybox;
-   [ "$?" = "0" ] && echo "-- The OrangeFox busybox sources have been cloned successfully" || echo "-- Failed to clone the OrangeFox busybox sources!";
+   [ "$?" = "0" ] && echo -e $WHITEONGREEN"-- The OrangeFox busybox sources have been cloned successfully"$NC || echo -e $RED"-- Failed to clone the OrangeFox busybox sources!"$NC;
 }
 
 # get device trees
@@ -394,12 +404,12 @@ local DIR=$MANIFEST_DIR/device/xiaomi;
    # test device
    local URL=git@gitlab.com:OrangeFox/device/"$test_build_device".git;
    [ "$USE_SSH" = "0" ] && URL=https://gitlab.com/OrangeFox/device/"$test_build_device".git;
-   echo "-- Pulling the $test_build_device device tree ...";
+   echo -e $ORANGE"-- Pulling the $test_build_device device tree ..."$NC;
    git clone $URL -b "$FOX_DEF_BRANCH" "$test_build_device";
 
    # done
    if [ -d "$test_build_device" -a -d "$test_build_device/recovery" ]; then
-      echo "-- Finished fetching the OrangeFox $test_build_device device tree.";
+      echo -e $ORANGE"-- Finished fetching the OrangeFox $test_build_device device tree."$NC;
    else
       abort "-- get_device_tree() - could not fetch the OrangeFox $test_build_device device tree.";
    fi
@@ -422,8 +432,8 @@ test_build() {
    mkdir -p $OUT_DIR;
 
    cd $MANIFEST_DIR/;
-   echo "-- Compiling a test build for device \"$test_build_device\". This will take a *VERY* long time ...";
-   echo "-- Start compiling: ";
+   echo -e $ORANGE"-- Compiling a test build for device \"$test_build_device\". This may take a *VERY* long time ..."$NC;
+   echo -e $ORANGE"-- Start compiling: "$NC;
    . build/envsetup.sh;
 
    # what are we lunching (AOSP or Omni)>
@@ -475,9 +485,9 @@ WorkNow() {
     # test_build; # comment this out - don't do a test build by default
 
     local STOP=$(date);
-    echo "-- Stop time =$STOP";
-    echo "-- Start time=$START";
-    echo "-- Now, clone your device trees to the correct locations!";
+    echo -e $BLUE"-- Stop time =$STOP"$NC;
+    echo -e $BLUE"-- Start time=$START"$NC;
+    echo -e $GREEN"-- Now, clone your device trees to the correct locations!"$NC;
     exit 0;
 }
 
