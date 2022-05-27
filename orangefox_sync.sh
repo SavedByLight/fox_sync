@@ -59,6 +59,7 @@ do_fox_100() {
 	DEVICE_BRANCH="android-10";
 	test_build_device="miatoll";
 	MIN_MANIFEST="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git";
+	CLONE_COMMONSYS_REPO="true";
 	[ -z "$MANIFEST_DIR" ] && MANIFEST_DIR="$BASE_DIR/$FOX_DEF_BRANCH";
 }
 
@@ -70,6 +71,7 @@ do_fox_90() {
 	DEVICE_BRANCH="android-9.0";
 	test_build_device="mido";
 	MIN_MANIFEST="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git";
+	CLONE_COMMONSYS_REPO="true";
 	[ -z "$MANIFEST_DIR" ] && MANIFEST_DIR="$BASE_DIR/$FOX_DEF_BRANCH";
 }
 
@@ -276,6 +278,17 @@ clone_common() {
    fi
 }
 
+# Clone the commonsys repo
+clone_commonsys(){
+	 cd $MANIFEST_DIR/;
+	 if [ "$CLONE_COMMONSYS_REPO" = "true" ]; then
+		if [ ! -d vendor/qcom/opensource/commonsys ]; then
+			echo "-- Cloning qcom commonsys ...";
+			git clone --depth=1 https://github.com/TeamWin/android_vendor_qcom_opensource_commonsys.git -b $DEVICE_BRANCH vendor/qcom/opensource/commonsys;
+		fi
+	fi
+}
+
 # get the OrangeFox recovery sources
 clone_fox_recovery() {
 local URL="";
@@ -450,6 +463,8 @@ WorkNow() {
     patch_minimal_manifest;
 
     clone_common;
+
+    clone_commonsys;
 
     [ "$BASE_VER" != "12" ] && clone_fox_recovery; # no fox_12.1 yet
 
