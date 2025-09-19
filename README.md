@@ -10,7 +10,7 @@
 
 ### 2. Do the syncing (this can take up to 1-2 hours, and can use up to 40GB-80GB of disk space) - below is an example, for 12.1 (amend as required for other branches) ##
 	cd ~/OrangeFox_sync/sync/
-	./orangefox_sync.sh --branch 12.1 --path ~/fox_12.1
+	./orangefox_sync.sh --branch 14.1 --path /home/j/fox_14.1
 Notes:
 - You *MUST* supply an *ABSOLUTE* path name for the "--path" switch
 - If the sync process gets stuck, you might need to terminate it with Ctrl-C and then run the script again
